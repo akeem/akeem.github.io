@@ -1,55 +1,30 @@
-var missingDataGraphParams = {
-  title: "Instant Article Views",
-  animate_on_load: true,
-  missing_is_zero: true,
-  description: "Instant Articles for the requested page views",
-  chart_type: 'missing-data',
-  missing_text: 'Query for insights',
-  target: '#chart',
-  full_width: true,
-  height: 300,
-  x_label: 'Dates',
-  y_label: 'Visitors',
-  show_tooltips: true,
-  right: 50,
-  legend: ['All traffic', 'Android', 'IOS'],
-};
-
-var dataGraphParams = {
-  title: "Instant Article Views",
-  animate_on_load: true,
-  missing_is_zero: true,
-  description: "Instant Articles for the requested page views",
-  area: false,
-  full_width: true,
-  height: 300,
-  target: '#chart',
-  x_accessor: 'time',
-  y_accessor: 'value',
-  x_label: 'Dates',
-  y_label: 'Visitors',
-  show_tooltips: true,
-  right: 50,
-  legend: ['All traffic', 'Android', 'IOS'],
-};
-
 $(document).ready(function(){
-  MG.data_graphic(missingDataGraphParams);
+  MG.data_graphic(AnalyticsGraphDefaults.missingDataGraphParams);
 });
 
-function renderGraph(data){
-  for(var i = 0; i < data.length; i++) {
-    MG.convert.date(data[i], 'time', "%Y-%m-%d");
-  }
+function createTable(table, data, tableDefaults){
+  if ( $.fn.DataTable.isDataTable(table) ) {
+    $(table).DataTable().destroy();
+    $(table).empty();
+  };
 
-  dataGraphParams["data"] = data;
-  MG.data_graphic(dataGraphParams);
+  var dtable = $(table).DataTable(tableDefaults);
+  dtable.clear().rows.add(data).draw();
 }
 
-function populateDataTable(table, data){
-  var table = $(table).DataTable({
-    retrieve: true,
+function dataMissingState(){
+  AnalyticsGraphDefaults.missingDataGraphParams["missing_text"] = "Insights is unavailable for the window requested";
+  MG.data_graphic(AnalyticsGraphDefaults.missingDataGraphParams);
+  if ( $.fn.DataTable.isDataTable("#table") ) {
+    $("#table").DataTable().destroy();
+    $("#table").empty();
+  };
+}
+
+function createVisitorTable(table, data){
+  createTable(table, data, {
     dom: 'rBtip',
+    destroy: true,
     columns: [
       {data: 'time', title: "Date", type: "date"},
       {data: 'value', title: "Visitors"},
@@ -59,8 +34,32 @@ function populateDataTable(table, data){
     paging: false,
     buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
   });
+}
 
-  table.clear().rows.add(data).draw();
+function createDurationTable(table, data){
+  createTable(table, data, {
+    destroy: true,
+    dom: 'rBtip',
+    columns: [
+      {data: 'bucket', title: "Visit in Seconds"},
+      {data: 'value', title: "Visitors"},
+    ],
+    paging: false,
+    buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
+  });
+}
+
+function createAverageDurationTable(table, data){
+  createTable(table, data,{
+    destroy: true,
+    dom: 'rBtip',
+    columns: [
+      {data: 'date', title: "Week"},
+      {data: 'value', title: "Average Visitor Duration (seconds)"},
+    ],
+    paging: false,
+    buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
+  });
 }
 
 function formatDailyData(data){
@@ -72,48 +71,110 @@ function formatDailyData(data){
   });
 }
 
+function packageVisitorData(totalDailyVisitors, facetedVisitorData){
+  var byPlatform= _.groupBy(facetedVisitorData,
+    function(currentDayData){
+      return currentDayData.breakdowns.platform;
+    });
+
+    var allData = [];
+
+    if(!_.isEmpty(totalDailyVisitors)){
+      allData.push(totalDailyVisitors);
+    }
+
+    if(!_.isEmpty(byPlatform["ANDROID"])){
+      allData.push(byPlatform["ANDROID"]);
+    }
+
+    if(!_.isEmpty(byPlatform["IOS"])){
+      allData.push(byPlatform["IOS"]);
+    }
+
+    var mergedData = mergeVisitorData(allData[0], allData[1], allData[2]);
+    formatDailyData(allData)
+
+    return allData;
+}
+
 function getVisitData(params, params2){
   var publisherID = document.getElementById('pubID').value;
 
   FB.api(publisherID, 'get', params, function(response) {
     FB.api(publisherID, 'get', params2, function(response2) {
       if (!!response.instant_articles_insights) {
-        var byPlatform= _.groupBy(response2.instant_articles_insights.data,
-          function(currentDayData){
-            return currentDayData.breakdowns.platform;
-          });
+        allData = packageVisitorData(response.instant_articles_insights.data,
+          response2.instant_articles_insights.data);
 
-        var totalDailyVisitors = response.instant_articles_insights.data;
-        var allData = [];
+        var mergedData = mergeVisitorData(allData[0], allData[1], allData[2]);
 
-        if(!_.isEmpty(totalDailyVisitors)){
-          allData.push(totalDailyVisitors);
+        for(var i = 0; i < allData.length; i++) {
+          MG.convert.date(allData[i], 'time', "%Y-%m-%d");
         }
 
-        if(!_.isEmpty(byPlatform["ANDROID"])){
-          allData.push(byPlatform["ANDROID"]);
-        }
-
-        if(!_.isEmpty(byPlatform["IOS"])){
-          allData.push(byPlatform["IOS"]);
-        }
-
-        var mergedData = mergeData(allData[0], allData[1], allData[2]);
-        formatDailyData(allData)
-        renderGraph(allData);
-        populateDataTable("#table", mergedData);
+        AnalyticsGraphDefaults.dataGraphParams["data"] = allData;
+        MG.data_graphic(AnalyticsGraphDefaults.dataGraphParams);
+        createVisitorTable("#table", mergedData);
 
     } else {
-      missingDataGraphParams["missing_text"] = "Insights is unavailable for the window requested";
-      MG.data_graphic(missingDataGraphParams);
+      dataMissingState();
     }
   });
 });
 }
 
-function getStats() {
+function getVisitDuration(params){
+  var publisherID = document.getElementById('pubID').value;
+    FB.api(publisherID, 'get', params, function(response) {
+      if (!!response.instant_articles_insights) {
+        var bucketedData = response.instant_articles_insights.data;
+        var gData = _.map(bucketedData, function(data){
+          return { bucket: parseInt(data.breakdowns.bucket),
+            value: parseInt(data.value)};
+          });
+
+          var groups = _(gData).groupBy('bucket');
+          var data = _(groups).map(function(g, key) {
+            return { bucket: parseInt(key),
+              value: _(g).reduce(function(m,x) { return m + x.value; }, 0) };
+            });
+
+            AnalyticsGraphDefaults.visitDurationGraphParams["data"] = data;
+            MG.data_graphic(AnalyticsGraphDefaults.visitDurationGraphParams);
+            createDurationTable("#table", data);
+          }else {
+            dataMissingState();
+          }
+        });
+}
+
+function getAverageVisitDurations(params){
+  var publisherID = document.getElementById('pubID').value;
+
+  FB.api(publisherID, 'get', params, function(response) {
+    if (!!response.instant_articles_insights) {
+      var bucketedData = response.instant_articles_insights.data;
+      var gData = _.map(bucketedData, function(data){
+        return {
+          date: moment(data.time).format("YYYY-MM-DD"),
+          value: parseInt(data.value)
+        };
+      });
+
+      MG.convert.date(gData, 'date', "%Y-%m-%d");
+      AnalyticsGraphDefaults.averageVisitDurationGraphParams["data"] = gData;
+      MG.data_graphic(AnalyticsGraphDefaults.averageVisitDurationGraphParams);
+      createAverageDurationTable("#table", gData)
+    }else{
+      dataMissingState();
+    }
+  });
+}
+
+function entryPoint(){
   var startOfRange = document.getElementById('rangeStart').value;
   var endOfRange = document.getElementById('rangeEnd').value;
+  var metric =  document.getElementById('metric').value;
 
   if(_.isEmpty(startOfRange)){
     startOfRange = "90 days ago";
@@ -123,26 +184,46 @@ function getStats() {
     endOfRange = "now";
   }
 
+  if(_.isEmpty(metric)){
+    metric="all_views"
+  }
+
+  getStats(startOfRange, endOfRange, metric);
+}
+
+function getStats(startOfRange="90 days ago", endOfRange="now", metric="all_views") {
   var allViewsParams = {
     fields:
-    'instant_articles_insights.metric(all_views).period(day).since('+startOfRange+').until('+endOfRange+')'
+    'instant_articles_insights.metric('+metric+').period(day).since('+startOfRange+').until('+endOfRange+')'
   };
 
   var allViewsByPlatformParams = {
     fields:
-    'instant_articles_insights.metric(all_views).breakdown(platform).period(day).since('+startOfRange+').until('+endOfRange+')'
+    'instant_articles_insights.metric('+metric+').breakdown(platform).period(day).since('+startOfRange+').until('+endOfRange+')'
   };
+
+  var viewDurationParams = {
+    fields:
+    'instant_articles_insights.metric('+metric+').period(week).since('+startOfRange+').until('+endOfRange+')'
+  };
+
 
   FB.getLoginStatus(function(response) {
     if (response.status === 'connected') {
-      getVisitData(allViewsParams, allViewsByPlatformParams);
+      if(metric==='all_view_durations'){
+        getVisitDuration(viewDurationParams);
+      }else if(metric === 'all_view_durations_average'){
+        getAverageVisitDurations(viewDurationParams);
+      }else {
+        getVisitData(allViewsParams, allViewsByPlatformParams);
+      }
     } else {
       FB.login();
     }
   });
 }
 
-function mergeData(totalVisitorData,
+function mergeVisitorData(totalVisitorData,
                    androidVisitorData,
                    iosVisitorData){
 
