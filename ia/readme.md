@@ -15,3 +15,14 @@ for the requested time frame.
 ## Whats next?
 
 * Selection of weekly metrics (view durations & scroll depth breakdowns).
+
+## Third Party Libraries
+
+* jquery
+* DataTables jQuery plugin
+* MetricsGraphics
+* FontAwesome
+* Bootstrap
+* moment.js
+* underscore.js
+* d3.js
