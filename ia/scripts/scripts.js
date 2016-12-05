@@ -23,7 +23,7 @@ function dataMissingState(){
 
 function createVisitorTable(table, data){
   createTable(table, data, {
-    dom: 'rBtip',
+    dom: 'rlBtip',
     destroy: true,
     columns: [
       {data: 'time', title: "Date", type: "date"},
@@ -31,7 +31,8 @@ function createVisitorTable(table, data){
       {data: 'android', title: "Android"},
       {data: 'ios', title: "IOS"},
     ],
-    paging: false,
+    pagingType: "full_numbers",
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
     buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
   });
 }
@@ -39,12 +40,14 @@ function createVisitorTable(table, data){
 function createDurationTable(table, data){
   createTable(table, data, {
     destroy: true,
-    dom: 'rBtip',
+    dom: 'rlBtip',
     columns: [
       {data: 'bucket', title: "Visit in Seconds"},
       {data: 'value', title: "Visitors"},
     ],
-    paging: false,
+
+    pagingType: "full_numbers",
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
     buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
   });
 }
@@ -52,12 +55,13 @@ function createDurationTable(table, data){
 function createAverageDurationTable(table, data){
   createTable(table, data,{
     destroy: true,
-    dom: 'rBtip',
+    dom: 'rlBtip',
     columns: [
       {data: 'date', title: "Week"},
       {data: 'value', title: "Average Visitor Duration (seconds)"},
     ],
-    paging: false,
+    pagingType: "full_numbers",
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
     buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
   });
 }
