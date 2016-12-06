@@ -21,6 +21,10 @@ function dataMissingState(){
   };
 }
 
+function getPublisherId(){
+  document.getElementById('pubID').value;
+}
+
 function createVisitorTable(table, data){
   createTable(table, data, {
     dom: 'rlBtip',
@@ -102,7 +106,7 @@ function packageVisitorData(totalDailyVisitors, facetedVisitorData){
 }
 
 function getVisitData(params, params2){
-  var publisherID = document.getElementById('pubID').value;
+  var publisherID = getPublisherId();
 
   FB.api(publisherID, 'get', params, function(response) {
     FB.api(publisherID, 'get', params2, function(response2) {
@@ -110,7 +114,7 @@ function getVisitData(params, params2){
         allData = packageVisitorData(response.instant_articles_insights.data,
           response2.instant_articles_insights.data);
 
-        var mergedData = mergeVisitorData(allData[0], allData[1], allData[2]);
+        var mergedData = _mergeVisitorData(allData[0], allData[1], allData[2]);
 
         for(var i = 0; i < allData.length; i++) {
           MG.convert.date(allData[i], 'time', "%Y-%m-%d");
@@ -128,7 +132,8 @@ function getVisitData(params, params2){
 }
 
 function getVisitDuration(params){
-  var publisherID = document.getElementById('pubID').value;
+  var publisherID = getPublisherId();
+
     FB.api(publisherID, 'get', params, function(response) {
       if (!!response.instant_articles_insights) {
         var bucketedData = response.instant_articles_insights.data;
@@ -153,7 +158,7 @@ function getVisitDuration(params){
 }
 
 function getAverageVisitDurations(params){
-  var publisherID = document.getElementById('pubID').value;
+  var publisherID = getPublisherId();
 
   FB.api(publisherID, 'get', params, function(response) {
     if (!!response.instant_articles_insights) {
@@ -195,6 +200,7 @@ function entryPoint(){
   getStats(startOfRange, endOfRange, metric);
 }
 
+
 function getStats(startOfRange="90 days ago", endOfRange="now", metric="all_views") {
   var allViewsParams = {
     fields:
@@ -227,7 +233,7 @@ function getStats(startOfRange="90 days ago", endOfRange="now", metric="all_view
   });
 }
 
-function mergeVisitorData(totalVisitorData,
+function _mergeVisitorData(totalVisitorData,
                    androidVisitorData,
                    iosVisitorData){
 
