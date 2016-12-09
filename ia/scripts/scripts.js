@@ -2,18 +2,31 @@ $(document).ready(function(){
   MG.data_graphic(AnalyticsGraphDefaults.missingDataGraphParams);
 });
 
-function createTable(table, data, tableDefaults){
+function createTable(table, data, columns){
   if ( $.fn.DataTable.isDataTable(table) ) {
     $(table).DataTable().destroy();
     $(table).empty();
   };
 
-  var dtable = $(table).DataTable(tableDefaults);
+  var tableDefaults = {
+    dom: 'rBtip',
+    destroy: true,
+    pagingType: "full_numbers",
+    pageLength: 25,
+    buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
+  };
+
+  var c = Object.assign(tableDefaults, columns);
+
+  var dtable = $(table).DataTable(c);
   dtable.clear().rows.add(data).draw();
+
+  dtable.buttons().container()
+       .appendTo( '#tableButtons');
 }
 
 function dataMissingState(){
-  AnalyticsGraphDefaults.missingDataGraphParams["missing_text"] = "Insights is unavailable for the window requested";
+  AnalyticsGraphDefaults.missingDataGraphParams["missing_text"] = "Insights are unavailable for the window requested";
   MG.data_graphic(AnalyticsGraphDefaults.missingDataGraphParams);
   if ( $.fn.DataTable.isDataTable("#table") ) {
     $("#table").DataTable().destroy();
@@ -22,51 +35,35 @@ function dataMissingState(){
 }
 
 function getPublisherId(){
-  document.getElementById('pubID').value;
+  return document.getElementById('pubID').value;
 }
 
 function createVisitorTable(table, data){
   createTable(table, data, {
-    dom: 'rlBtip',
-    destroy: true,
     columns: [
       {data: 'time', title: "Date", type: "date"},
       {data: 'value', title: "Visitors"},
       {data: 'android', title: "Android"},
       {data: 'ios', title: "IOS"},
-    ],
-    pagingType: "full_numbers",
-    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-    buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
+    ]
   });
 }
 
 function createDurationTable(table, data){
   createTable(table, data, {
-    destroy: true,
-    dom: 'rlBtip',
     columns: [
       {data: 'bucket', title: "Visit in Seconds"},
       {data: 'value', title: "Visitors"},
-    ],
-
-    pagingType: "full_numbers",
-    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-    buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
+    ]
   });
 }
 
 function createAverageDurationTable(table, data){
   createTable(table, data,{
-    destroy: true,
-    dom: 'rlBtip',
     columns: [
       {data: 'date', title: "Week"},
       {data: 'value', title: "Average Visitor Duration (seconds)"},
-    ],
-    pagingType: "full_numbers",
-    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-    buttons: [ {extend: 'csv', text: 'Export to CSV'} ]
+    ]
   });
 }
 
@@ -99,7 +96,7 @@ function packageVisitorData(totalDailyVisitors, facetedVisitorData){
       allData.push(byPlatform["IOS"]);
     }
 
-    var mergedData = mergeVisitorData(allData[0], allData[1], allData[2]);
+    var mergedData = _mergeVisitorData(allData[0], allData[1], allData[2]);
     formatDailyData(allData)
 
     return allData;

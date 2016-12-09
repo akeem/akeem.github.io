@@ -24,40 +24,65 @@
 </head>
 
 <body>
-<div id="fb-root"></div>
-<div class="section">
-  <div class="fb-login-button"
-     data-max-rows="1"
-     data-size="large"
-     data-show-faces="false"
-     data-auto-logout-link="true"
-     data-scope="read_insights,pages_show_list">
+  <div class="container">
+    <br/>
+    <div id="fb-root"></div>
+
+    <div class="row">
+        <div class="col-md-2">
+      <div class="fb-login-button"
+         data-max-rows="1"
+         data-size="large"
+         data-show-faces="false"
+         data-auto-logout-link="true"
+         data-scope="read_insights,pages_show_list">
+       </div>
+     </div>
+
+     <div class="col-md-2">
+       <label for="pubID">Publisher ID</label>
+       <input type="text" id="pubID"
+       placeholder="Publisher FBID"
+       autocomplete="on"/>
+     </div>
+
+     <div class="col-md-2">
+       <label for="rangeStart">Start of Range</label>
+       <input type="date" id="rangeStart">
+     </div>
+
+     <div class="col-md-2">
+       <label for="rangeEnd">End of Range</label>
+       <input type="date" id="rangeEnd">
+     </div>
+
+     <div class="col-md-2">
+       <label for="metric">Metric</label>
+       <select id="metric">
+         <option value='all_views' selected>All Views</option>
+         <option value='all_view_durations'>View Duration</option>
+         <option value='all_view_durations_average'>Average View Duration</option>
+       </select>
+     </div>
+
+     <div class="col-md-2">
+       <button type="button" class="btn btn-default" onClick="entryPoint()">Get insights</button>
+     </div>
    </div>
+ </br>
 
-   <div class="section inputs">
-     <input type="text" id="pubID"
-            placeholder="Publisher FBID"
-            autocomplete="on"/>
-     <input type="date" id="rangeStart">
-     <input type="date" id="rangeEnd">
+ <div class="row">
+   <div id="chart"></div>
+ </div>
 
-     <select id="metric">
-       <option value='all_views' selected>All Views</option>
-       <option value='all_view_durations'>View Duration</option>
-       <option value='all_view_durations_average'>Average View Duration</option>
-       <!-- <option value='all_scrolls'>Scroll Depth</option> -->
-     </select>
-
-     <button onClick="entryPoint()">Get insights</button>
+ <div class="row" id="tableButtons"></div>
+    <div class="row">
+     <table id="table" class="table table-striped table-bordered">
+       <thead></thead>
+       <tbody></tbody>
+       <tfoot></tfoot>
+     </table>
    </div>
-</div>
-
-<div id="chart"></div>
-<table id="table">
-  <thead></thead>
-  <tbody></tbody>
-  <tfoot></tfoot>
-</table>
-
+ </div>
 </body>
 </html>
