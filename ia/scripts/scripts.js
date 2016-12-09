@@ -1,7 +1,3 @@
-$(document).ready(function(){
-  MG.data_graphic(AnalyticsGraphDefaults.missingDataGraphParams);
-});
-
 function createTable(table, data, columns){
   if ( $.fn.DataTable.isDataTable(table) ) {
     $(table).DataTable().destroy();
@@ -22,7 +18,7 @@ function createTable(table, data, columns){
   dtable.clear().rows.add(data).draw();
 
   dtable.buttons().container()
-       .appendTo( '#tableButtons');
+       .appendTo('#tableButtons');
 }
 
 function dataMissingState(){
