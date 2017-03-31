@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<head>
+  <title>
+
+  </title>
+
+</head>
+
+<body>
+  <script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '320257908330342',
+      xfbml      : true,
+      version    : 'v2.8'
+    });
+    FB.AppEvents.logPageView();
+    /*
+      if you were a G, this is where you would register handlers
+      and what not.
+    */
+
+    FB.AppEvents.logEvent(FB.AppEvents.EventNames.VIEWED_CONTENT,
+                          1,
+                          { content_type: 'technology' });
+
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "https://connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+
+ <div id="shareBtn" class="btn btn-success clearfix">Share</div>
+
+<script>
+document.getElementById('shareBtn').onclick = function() {
+  FB.ui({
+    method: 'share',
+    display: 'popup',
+    href: 'https://akeem.github.io/pixel_test.html',
+  }, function(response){});
+}
+</script>
+
+An FBA Test Page
+
+
+</body>
+</html>
