@@ -43,7 +43,7 @@
 document.getElementById('shareBtn').onclick = function() {
   FB.ui({
     method: 'share',
-    display: 'popup',
+    display: 'iframe',
     href: 'https://akeem.github.io/pixel_test.html',
   }, function(response){});
 }
