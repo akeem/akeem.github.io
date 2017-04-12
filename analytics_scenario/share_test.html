@@ -24,7 +24,12 @@
                           1,
                           { content_type: 'technology' });
 
-
+    document.getElementById('shareBtn').onclick = function() {
+      FB.ui({
+        method: 'share',
+        href: 'https://akeem.github.io/pixel_test.html',
+      }, function(response){});
+    };
 
   };
 
@@ -39,15 +44,6 @@
 
  <div id="shareBtn" class="btn btn-success clearfix">Share</div>
 
-<script>
-document.getElementById('shareBtn').onclick = function() {
-  FB.ui({
-    method: 'share',
-    display: 'iframe',
-    href: 'https://akeem.github.io/pixel_test.html',
-  }, function(response){});
-}
-</script>
 
 An FBA Test Page
 
